@@ -4,7 +4,8 @@ const { verifyToken, checkRole } = require('../middleware/auth');
 const {
   createFolder,
   getFoldersByProgram,
-  getSubfolders
+  getSubfolders,
+  getFoldersByUser
 } = require('../controllers/folderController');
 
 // Admin creates folder or subfolder
@@ -15,5 +16,8 @@ router.get('/program/:programId', verifyToken, getFoldersByProgram);
 
 // Get subfolders of a specific folder (subjects inside semester)
 router.get('/subfolders/:parentFolderId', verifyToken, getSubfolders);
+
+
+router.get('/user', verifyToken, checkRole(['user']), getFoldersByUser);
 
 module.exports = router;

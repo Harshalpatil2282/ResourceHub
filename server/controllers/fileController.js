@@ -5,22 +5,25 @@ const File = require('../models/File');
 exports.getFilesByUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
-    if (!user || !user.university) {
-      return res.status(403).json({ msg: 'User or university not found' });
+    const { folderId, search = '' } = req.query;
+
+    const query = {
+      universityId: user.university,
+      name: { $regex: search, $options: 'i' }
+    };
+
+     if (folderId && mongoose.Types.ObjectId.isValid(folderId)) {
+      query.folderId = folderId;
     }
 
-    const folderId = req.query.folderId || null;
 
-    const files = await File.find({
-      folderId,
-      universityId: user.university,
-    });
-
+    const files = await File.find(query);
     res.json(files);
   } catch (err) {
-    res.status(500).json({ msg: 'Error fetching files', error: err.message });
+    res.status(500).json({ msg: 'Error searching files', error: err.message });
   }
 };
+
 exports.getFilesByUser = async (req, res) => {
   const user = await User.findById(req.user.userId);
   const files = await File.find({

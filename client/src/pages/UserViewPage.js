@@ -18,7 +18,12 @@ function UserDashboard() {
   const fetchFolders = async () => {
     const res = await API.get(`/folders/user?parentId=${selectedFolder || ''}`);
     setFolders(res.data);
-    const resFiles = await API.get(`/files/user?folderId=${selectedFolder || ''}`);
+    const resFiles = await API.get(
+      selectedFolder && selectedFolder.length === 24
+        ? `/files/user?folderId=${selectedFolder}`
+        : `/files/user`
+    );
+
     setFiles(resFiles.data);
   };
 

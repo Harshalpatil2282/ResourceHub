@@ -17,7 +17,7 @@ exports.register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      university, // not universityId
+      university, 
       role: role || 'user'
     });
 
