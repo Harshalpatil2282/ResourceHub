@@ -1,50 +1,122 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import API from '../services/api';
 import UniversitySelector from '../component/user/UniversitySelector';
 import ProgramList from '../component/user/ProgramList';
 import FolderList from '../component/user/FolderList';
-import FileListUser from '../component/user/FileListUser';
 import SubfolderList from '../component/user/SubfolderList';
+import FileCard from '../component/user/FileCard';
 
 function UserDashboard() {
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
   const [selectedFolder, setSelectedFolder] = useState('');
   const [selectedSubfolder, setSelectedSubfolder] = useState('');
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch files whenever folder/subfolder or searchQuery changes
+  useEffect(() => {
+    const fetchFiles = async () => {
+      if (!selectedFolder && !selectedSubfolder) return;
+      setLoading(true);
+      try {
+        const folderId = selectedSubfolder || selectedFolder;
+        const res = await API.get(`/files/user?folderId=${folderId}&search=${searchQuery}`);
+        setFiles(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounce = setTimeout(fetchFiles, 400);
+    return () => clearTimeout(debounce);
+  }, [selectedFolder, selectedSubfolder, searchQuery]);
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
       <h1>📚 ResourceHub by Harsh Patil</h1>
-      <p>Your one-stop academic resource hub for PDFs, Notes, PPTs, and more.</p>
+      <p style={{ color: '#555' }}>
+        Your one-stop academic resource hub for PDFs, Notes, PPTs, and more.
+      </p>
       <hr />
 
-      <UniversitySelector onSelect={setSelectedUniversity} />
+      {/* University Selection */}
+      <UniversitySelector onSelect={(id) => {
+        setSelectedUniversity(id);
+        setSelectedProgram('');
+        setSelectedFolder('');
+        setSelectedSubfolder('');
+        setFiles([]);
+      }} />
 
+      {/* Program Selection */}
       {selectedUniversity && (
         <ProgramList
           universityId={selectedUniversity}
-          onSelect={setSelectedProgram}
+          onSelect={(id) => {
+            setSelectedProgram(id);
+            setSelectedFolder('');
+            setSelectedSubfolder('');
+            setFiles([]);
+          }}
         />
       )}
 
+      {/* Folder (Semester) Selection */}
       {selectedProgram && (
         <FolderList
           programId={selectedProgram}
-          onSelect={setSelectedFolder}
+          onSelect={(id) => {
+            setSelectedFolder(id);
+            setSelectedSubfolder('');
+            setFiles([]);
+          }}
         />
       )}
 
+      {/* Subfolder Selection */}
       {selectedFolder && (
-        <FileListUser folderId={selectedFolder} />
-      )}
-      {selectedFolder && !selectedSubfolder && (
         <SubfolderList
           parentFolderId={selectedFolder}
-          onSelect={setSelectedSubfolder}
+          onSelect={(id) => {
+            setSelectedSubfolder(id);
+            setFiles([]);
+          }}
         />
       )}
 
-      {selectedSubfolder && (
-        <FileListUser folderId={selectedSubfolder} />
+      {/* Search and File Display */}
+      {(selectedFolder || selectedSubfolder) && (
+        <>
+          <input
+            type="text"
+            placeholder="🔍 Search files by name/type..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              marginTop: '15px',
+              borderRadius: '8px',
+              border: '1px solid #ccc'
+            }}
+          />
+
+          {loading ? (
+            <p>Loading files...</p>
+          ) : files.length > 0 ? (
+            <div style={{ marginTop: '20px' }}>
+              {files.map((file) => (
+                <FileCard key={file._id} file={file} />
+              ))}
+            </div>
+          ) : (
+            <p style={{ marginTop: '15px', color: '#999' }}>No files found in this folder.</p>
+          )}
+        </>
       )}
     </div>
   );
