@@ -12,10 +12,10 @@ const {
 router.post('/', verifyToken, checkRole(['admin']), createFolder);
 
 // Get all root folders (semesters) of a program
-router.get('/program/:programId', verifyToken, getFoldersByProgram);
+router.get('/program/:programId', verifyToken,checkRole(['admin','user']), getFoldersByProgram);
 
 // Get subfolders of a specific folder (subjects inside semester)
-router.get('/subfolders/:parentFolderId', verifyToken, getSubfolders);
+router.get('/subfolders/:parentFolderId', verifyToken,checkRole(['admin','user']), getSubfolders);
 
 
 router.get('/user', verifyToken, checkRole(['user']), getFoldersByUser);
