@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const folderSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  programId: {
+  program: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Program',
     required: true
@@ -13,7 +13,7 @@ const folderSchema = new mongoose.Schema({
   required: true,
 }
 ,
-  parentFolderId: {
+  parentFolder: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Folder',
     default: null

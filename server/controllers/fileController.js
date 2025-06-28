@@ -24,14 +24,14 @@ exports.getFilesByUser = async (req, res) => {
   }
 };
 
-exports.getFilesByUser = async (req, res) => {
-  const user = await User.findById(req.user.userId);
-  const files = await File.find({
-    universityId: user.university,
-    folderId: req.query.folderId
-  });
-  res.json(files);
-};
+// exports.getFilesByUser = async (req, res) => {
+//   const user = await User.findById(req.user.userId);
+//   const files = await File.find({
+//     universityId: user.university,
+//     folderId: req.query.folderId
+//   });
+//   res.json(files);
+// };
 
 // 🗂️ (Optional) Admin: Get all files in folder (not filtered)
 exports.getFilesByFolder = async (req, res) => {
