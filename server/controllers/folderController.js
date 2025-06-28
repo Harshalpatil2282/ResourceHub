@@ -133,3 +133,22 @@ exports.getSubfolders = async (req, res) => {
     res.status(500).json({ msg: "Failed to get subfolders.", error: err.message });
   }
 };
+exports.getFoldersByUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user || !user.university) {
+      return res.status(403).json({ msg: 'Unauthorized or missing university' });
+    }
+
+    const parentId = req.query.parentId || null;
+
+    const folders = await Folder.find({
+      university: user.university,
+      parentFolderId: parentId,
+    });
+
+    res.json(folders);
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to get user folders', error: err.message });
+  }
+};

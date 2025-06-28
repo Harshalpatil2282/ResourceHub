@@ -1,96 +1,51 @@
-import React, { useEffect, useState } from 'react';
-import API from '../services/api';
+import React, { useState } from 'react';
+import UniversitySelector from '../component/user/UniversitySelector';
+import ProgramList from '../component/user/ProgramList';
+import FolderList from '../component/user/FolderList';
+import FileListUser from '../component/user/FileListUser';
+import SubfolderList from '../component/user/SubfolderList';
 
 function UserDashboard() {
-  const [folders, setFolders] = useState([]);
-  const [files, setFiles] = useState([]);
-  const [selectedFolder, setSelectedFolder] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-
-  useEffect(() => {
-    if (!isSearching) {
-      fetchFolders();
-    }
-    // eslint-disable-next-line
-  }, [selectedFolder, isSearching]);
-
-  const fetchFolders = async () => {
-    const res = await API.get(`/folders/user?parentId=${selectedFolder || ''}`);
-    setFolders(res.data);
-    const resFiles = await API.get(
-      selectedFolder && selectedFolder.length === 24
-        ? `/files/user?folderId=${selectedFolder}`
-        : `/files/user`
-    );
-
-    setFiles(resFiles.data);
-  };
-
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-    setIsSearching(true);
-    const res = await API.get(`/files/search?search=${searchTerm}`);
-    setFiles(res.data);
-    setFolders([]); // hide folders when searching
-  };
-
-  const clearSearch = () => {
-    setSearchTerm('');
-    setIsSearching(false);
-    fetchFolders(); // reload
-  };
+  const [selectedUniversity, setSelectedUniversity] = useState('');
+  const [selectedProgram, setSelectedProgram] = useState('');
+  const [selectedFolder, setSelectedFolder] = useState('');
+  const [selectedSubfolder, setSelectedSubfolder] = useState('');
 
   return (
-    <div>
-      <h2>🎓 University Dashboard</h2>
-      <div>
-        <input
-          type="text"
-          placeholder="🔍 Search files by name/subject"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+    <div style={{ padding: '20px' }}>
+      <h1>📚 ResourceHub by Harsh Patil</h1>
+      <p>Your one-stop academic resource hub for PDFs, Notes, PPTs, and more.</p>
+      <hr />
+
+      <UniversitySelector onSelect={setSelectedUniversity} />
+
+      {selectedUniversity && (
+        <ProgramList
+          universityId={selectedUniversity}
+          onSelect={setSelectedProgram}
         />
-        <button onClick={handleSearch}>Search</button>
-        {isSearching && <button onClick={clearSearch}>❌ Clear</button>}
-      </div>
-
-      {!isSearching && selectedFolder && (
-        <button onClick={() => setSelectedFolder(null)}>⬅️ Back</button>
       )}
 
-      {!isSearching && (
-        <>
-          <h4>📁 Folders</h4>
-          <ul>
-            {folders.map((folder) => (
-              <li key={folder._id}>
-                <button onClick={() => setSelectedFolder(folder._id)}>
-                  📂 {folder.name}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+      {selectedProgram && (
+        <FolderList
+          programId={selectedProgram}
+          onSelect={setSelectedFolder}
+        />
       )}
 
-      <h4>📄 Files</h4>
-      <ul>
-        {files.length > 0 ? (
-          files.map((file) => (
-            <li key={file._id}>
-              {file.name}
-              {file.canDownload ? (
-                <a href={file.url} download>⬇️ Download</a>
-              ) : (
-                <a href={file.url} target="_blank" rel="noopener noreferrer">👁️ View</a>
-              )}
-            </li>
-          ))
-        ) : (
-          <p>{isSearching ? 'No files found for your search.' : 'No files available.'}</p>
-        )}
-      </ul>
+      {selectedFolder && (
+        <FileListUser folderId={selectedFolder} />
+      )}
+      {selectedFolder && !selectedSubfolder && (
+        <SubfolderList
+          parentFolderId={selectedFolder}
+          onSelect={setSelectedSubfolder}
+        />
+      )}
+
+      {selectedSubfolder && (
+        <FileListUser folderId={selectedSubfolder} />
+      )}
     </div>
   );
 }

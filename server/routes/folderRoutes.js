@@ -28,7 +28,7 @@ const { verifyToken, checkRole } = require('../middleware/auth');
 const {
   createFolder,
   getFoldersByProgram,
-  getSubfolders
+  getSubfolders,getFoldersByUser
 } = require('../controllers/folderController');
 const Program = require('../models/Program');
 
@@ -49,5 +49,6 @@ router.get('/program/:programId', verifyToken, checkRole(['admin', 'user']), get
 
 // Get subfolders under a specific folder
 router.get('/subfolders/:parentFolderId', verifyToken, checkRole(['admin', 'user']), getSubfolders);
+router.get('/user', verifyToken, checkRole(['user']), getFoldersByUser);
 
 module.exports = router;
