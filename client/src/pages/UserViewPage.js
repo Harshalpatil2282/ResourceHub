@@ -5,6 +5,7 @@ import ProgramList from '../component/user/ProgramList';
 import FolderList from '../component/user/FolderList';
 import SubfolderList from '../component/user/SubfolderList';
 import FileCard from '../component/user/FileCard';
+import Breadcrumbs from '../component/user/Breadcrumbs';
 
 function UserDashboard() {
   const [selectedUniversity, setSelectedUniversity] = useState('');
@@ -14,6 +15,28 @@ function UserDashboard() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const clearBelow = (level) => {
+    if (level === 'university') {
+      setSelectedUniversity('');
+      setSelectedProgram('');
+      setSelectedFolder('');
+      setSelectedSubfolder('');
+      setFiles([]);
+    } else if (level === 'program') {
+      setSelectedProgram('');
+      setSelectedFolder('');
+      setSelectedSubfolder('');
+      setFiles([]);
+    } else if (level === 'folder') {
+      setSelectedFolder('');
+      setSelectedSubfolder('');
+      setFiles([]);
+    } else if (level === 'subfolder') {
+      setSelectedSubfolder('');
+      setFiles([]);
+    }
+  };
 
   // Fetch files whenever folder/subfolder or searchQuery changes
   useEffect(() => {
@@ -42,6 +65,15 @@ function UserDashboard() {
         Your one-stop academic resource hub for PDFs, Notes, PPTs, and more.
       </p>
       <hr />
+
+      {/* ✅ Breadcrumbs */}
+      <Breadcrumbs
+        university={selectedUniversity}
+        program={selectedProgram}
+        folder={selectedFolder}
+        subfolder={selectedSubfolder}
+        clearBelow={clearBelow}
+      />
 
       {/* University Selection */}
       <UniversitySelector onSelect={(id) => {
@@ -77,7 +109,7 @@ function UserDashboard() {
         />
       )}
 
-      {/* Subfolder Selection */}
+      {/* Subfolder (Subject) Selection */}
       {selectedFolder && (
         <SubfolderList
           parentFolderId={selectedFolder}
