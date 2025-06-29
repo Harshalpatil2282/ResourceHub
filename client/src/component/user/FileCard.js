@@ -1,8 +1,11 @@
 // src/component/user/FileCard.js
 
-import React from 'react';
+import React, { useState } from 'react';
+import PreviewModal from './PreviewModal';
 
 function FileCard({ file }) {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   const getFileIcon = (type) => {
     if (type.includes('pdf')) return '📕';
     if (type.includes('word') || type.includes('doc')) return '📄';
@@ -12,7 +15,7 @@ function FileCard({ file }) {
   };
 
   const handleView = () => {
-    window.open(file.url, '_blank');
+    setIsPreviewOpen(true);
   };
 
   const handleDownload = () => {
@@ -25,65 +28,75 @@ function FileCard({ file }) {
   };
 
   return (
-    <div
-      style={{
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        padding: '10px',
-        marginBottom: '10px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: '#fafafa'
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontSize: '24px', marginRight: '10px' }}>
-          {getFileIcon(file.type)}
-        </span>
-        <div>
-          <div style={{ fontWeight: 'bold' }}>{file.name}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>
-            {new Date(file.createdAt).toLocaleDateString()}
+    <>
+      <div
+        style={{
+          border: '1px solid #ddd',
+          borderRadius: '8px',
+          padding: '10px',
+          marginBottom: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: '#fafafa'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ fontSize: '24px', marginRight: '10px' }}>
+            {getFileIcon(file.type)}
+          </span>
+          <div>
+            <div style={{ fontWeight: 'bold' }}>{file.name}</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>
+              {new Date(file.createdAt).toLocaleDateString()}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <button
-          onClick={handleView}
-          style={{
-            padding: '5px 10px',
-            marginRight: '5px',
-            borderRadius: '5px',
-            border: 'none',
-            backgroundColor: '#007bff',
-            color: '#fff',
-            cursor: 'pointer'
-          }}
-        >
-          👁️ View
-        </button>
-
-        {file.canDownload ? (
+        <div>
           <button
-            onClick={handleDownload}
+            onClick={handleView}
             style={{
               padding: '5px 10px',
+              marginRight: '5px',
               borderRadius: '5px',
               border: 'none',
-              backgroundColor: '#28a745',
+              backgroundColor: '#007bff',
               color: '#fff',
               cursor: 'pointer'
             }}
           >
-            ⬇️ Download
+            👁️ Preview
           </button>
-        ) : (
-          <span style={{ color: 'red', fontSize: '12px' }}>View Only</span>
-        )}
+
+          {file.canDownload ? (
+            <button
+              onClick={handleDownload}
+              style={{
+                padding: '5px 10px',
+                borderRadius: '5px',
+                border: 'none',
+                backgroundColor: '#28a745',
+                color: '#fff',
+                cursor: 'pointer'
+              }}
+            >
+              ⬇️ Download
+            </button>
+          ) : (
+            <span style={{ color: 'red', fontSize: '12px' }}>View Only</span>
+          )}
+        </div>
       </div>
-    </div>
+
+      <PreviewModal
+        isOpen={isPreviewOpen}
+        onRequestClose={() => setIsPreviewOpen(false)}
+        fileUrl={file.url}
+        fileType={file.type}
+        fileName={file.name}
+      />
+    </>
   );
 }
 
