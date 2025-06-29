@@ -8,7 +8,7 @@ const fileFilter = (req, file, cb) => {
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   cb(null, extname);
 };
-
 const storage = multer.memoryStorage(); // keep it in RAM before Cloudinary
+
 
 module.exports = multer({ storage, fileFilter });

@@ -6,6 +6,8 @@ import FolderList from '../component/user/FolderList';
 import SubfolderList from '../component/user/SubfolderList';
 import FileCard from '../component/user/FileCard';
 import Breadcrumbs from '../component/user/Breadcrumbs';
+import ThemeToggle from '../component/common/ThemeToggle';
+
 
 function UserDashboard() {
   const [selectedUniversity, setSelectedUniversity] = useState('');
@@ -59,7 +61,10 @@ function UserDashboard() {
   }, [selectedFolder, selectedSubfolder, searchQuery]);
 
   return (
+    
     <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
+      <ThemeToggle />   {/* ✅ Add this */}
+
       <h1>📚 ResourceHub by Harsh Patil</h1>
       <p style={{ color: '#555' }}>
         Your one-stop academic resource hub for PDFs, Notes, PPTs, and more.
