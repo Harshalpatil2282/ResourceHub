@@ -152,3 +152,22 @@ exports.getFoldersByUser = async (req, res) => {
     res.status(500).json({ msg: 'Failed to get user folders', error: err.message });
   }
 };
+exports.getAllFolders = async (req, res) => {
+  try {
+    const folders = await Folder.find({});
+    res.json(folders);
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to get folders.', error: err.message });
+  }
+};
+exports.getAllFoldersDetailed = async (req, res) => {
+  try {
+    const folders = await Folder.find()
+      .populate('university', 'name')
+      .populate('program', 'name');
+    res.json(folders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Failed to fetch folders.", error: err.message });
+  }
+};

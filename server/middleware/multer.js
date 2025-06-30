@@ -11,4 +11,8 @@ const fileFilter = (req, file, cb) => {
 const storage = multer.memoryStorage(); // keep it in RAM before Cloudinary
 
 
-module.exports = multer({ storage, fileFilter });
+module.exports = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 50 * 1024 * 1024 } // 50 MB
+});

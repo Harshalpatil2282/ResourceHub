@@ -27,19 +27,19 @@ exports.getFilesByUser = async (req, res) => {
     res.status(500).json({ msg: 'Error fetching files', error: err.message });
   }
 };
-
-
-// 🗂️ (Optional) Admin: Get all files in folder (not filtered)
 exports.getFilesByFolder = async (req, res) => {
   try {
-    const { folderId } = req.params;
-    const files = await File.find({ folderId });
+    const files = await File.find({ folderId: req.params.folderId })
+      .populate('university', 'name')
+      .populate({
+        path: 'folderId',
+        populate: { path: 'program', select: 'name' }
+      });
     res.json(files);
   } catch (err) {
-    res.status(500).json({ msg: 'Error getting files' });
+    res.status(500).json({ msg: 'Failed to fetch files.', error: err.message });
   }
 };
-
 exports.searchFilesByUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);

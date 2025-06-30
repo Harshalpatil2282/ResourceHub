@@ -18,11 +18,17 @@ const fileSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  
   university: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'University',
     required: true
+  },
+  cloudinaryPublicId: {
+  type: String,
+  required: true,
   }
+  
 }, { timestamps: true });
 
 module.exports = mongoose.model('File', fileSchema);

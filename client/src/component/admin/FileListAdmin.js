@@ -13,10 +13,16 @@ function FileListAdmin({ folderId }) {
   }, [folderId]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure?')) return;
+  if (!window.confirm('Are you sure you want to delete this file?')) return;
+  try {
     await API.delete(`/files/${id}`);
     setFiles(files.filter(f => f._id !== id));
-  };
+  } catch (err) {
+    console.error(err);
+    alert('❌ Failed to delete file.');
+  }
+};
+
 
   const startEdit = (file) => {
     setEditId(file._id);
