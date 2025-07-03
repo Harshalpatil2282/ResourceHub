@@ -7,8 +7,11 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 
 function App() {
+  
   return (
+    
     <Router>
+      
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
@@ -31,6 +34,7 @@ function App() {
         <Route path='/register' element={<Register/>}/>
       </Routes>
     </Router>
+    
   );
 }
 
