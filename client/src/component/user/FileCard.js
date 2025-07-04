@@ -2,9 +2,13 @@
 
 import React, { useState } from 'react';
 import PreviewModal from './PreviewModal';
+import { useTheme } from '../../context/ThemeContext';
+import '../../styles/UserDashboard.css';
+
 
 function FileCard({ file }) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const { theme } = useTheme();
 
   const getFileIcon = (type) => {
     if (type.includes('pdf')) return '📕';
@@ -14,9 +18,7 @@ function FileCard({ file }) {
     return '📁';
   };
 
-  const handleView = () => {
-    setIsPreviewOpen(true);
-  };
+  const handleView = () => setIsPreviewOpen(true);
 
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -30,61 +32,63 @@ function FileCard({ file }) {
   return (
     <>
       <div
+        className="glass-card file-card"
         style={{
-          border: '1px solid #ddd',
-          borderRadius: '8px',
-          padding: '10px',
-          marginBottom: '10px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: '#fafafa'
+          cursor: 'pointer',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          background: theme === 'dark'
+            ? 'rgba(255, 255, 255, 0.05)'
+            : 'rgba(255, 255, 255, 0.4)',
+        }}
+        onClick={handleView}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.02)';
+          e.currentTarget.style.boxShadow = theme === 'dark'
+            ? '0 4px 20px rgba(0,0,0,0.4)'
+            : '0 4px 12px rgba(0,0,0,0.2)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = 'none';
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontSize: '24px', marginRight: '10px' }}>
-            {getFileIcon(file.type)}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '1.8rem' }}>{getFileIcon(file.type)}</span>
           <div>
-            <div style={{ fontWeight: 'bold' }}>{file.name}</div>
-            <div style={{ fontSize: '12px', color: '#666' }}>
+            <div
+              style={{
+                fontWeight: 'bold',
+                color: theme === 'dark' ? '#fff' : '#111',
+                wordBreak: 'break-word',
+              }}
+            >
+              {file.name}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: theme === 'dark' ? '#ccc' : '#555' }}>
               {new Date(file.createdAt).toLocaleDateString()}
             </div>
           </div>
         </div>
 
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
-            onClick={handleView}
-            style={{
-              padding: '5px 10px',
-              marginRight: '5px',
-              borderRadius: '5px',
-              border: 'none',
-              backgroundColor: '#007bff',
-              color: '#fff',
-              cursor: 'pointer'
-            }}
+            onClick={(e) => { e.stopPropagation(); handleView(); }}
+            className="glass-button"
           >
             👁️ Preview
           </button>
-
           {file.canDownload ? (
             <button
-              onClick={handleDownload}
-              style={{
-                padding: '5px 10px',
-                borderRadius: '5px',
-                border: 'none',
-                backgroundColor: '#28a745',
-                color: '#fff',
-                cursor: 'pointer'
-              }}
+              onClick={(e) => { e.stopPropagation(); handleDownload(); }}
+              className="glass-button"
             >
               ⬇️ Download
             </button>
           ) : (
-            <span style={{ color: 'red', fontSize: '12px' }}>View Only</span>
+            <span style={{ color: 'red', fontSize: '0.75rem' }}>View Only</span>
           )}
         </div>
       </div>

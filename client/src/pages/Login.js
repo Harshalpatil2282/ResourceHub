@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import '../styles/login.css';
+import { useTheme } from '../context/ThemeContext'; // adjust path if needed
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    if (theme !== 'dark') {
+      toggleTheme();
+    }
+    // eslint-disable-next-line
+  }, []); // Only run on mount
 
   const handleLogin = async (e) => {
     e.preventDefault();
