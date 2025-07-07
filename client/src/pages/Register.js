@@ -25,6 +25,7 @@ function Register() {
         localStorage.setItem('role', res.data.user.role);
         localStorage.setItem('userId', res.data.user.id);
         localStorage.setItem('university', res.data.user.university);
+        alert("Regestered Successfully");
         navigate('/user');
       } else {
         setMsg('❌ Registration failed. No token received.');
@@ -101,3 +102,4 @@ function Register() {
 }
 
 export default Register;
+

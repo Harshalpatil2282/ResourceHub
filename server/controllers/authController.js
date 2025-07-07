@@ -1,3 +1,7 @@
+
+
+
+
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -7,7 +11,7 @@ exports.register = async (req, res) => {
   const { name, email, password, university, role } = req.body;
 
   try {
-    const existing = await User.findOne({ email });
+    const existing = await User.findOne({ email }).populate('university');
     if (existing) {
       return res.status(400).json({ msg: "Email already exists" });
     }
@@ -17,12 +21,39 @@ exports.register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      university, 
+      university,
       role: role || 'user'
     });
 
     await user.save();
-    res.status(201).json({ msg: "User registered successfully" });
+
+    // const populatedUser = await User.findById(user._id).populate('university');
+    // res.staus(201).json({
+    //   token,
+    //   user:{
+    //     id: populatedUser._id,
+    //     name: populatedUser.name,
+    //     email: populatedUser.email,
+    //     role: populatedUser.role,
+    //     university: populatedUser.university;
+    //   }
+    // })
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        university: user.university
+      }
+    });
 
   } catch (err) {
     console.error("Register Error:", err);
@@ -30,12 +61,41 @@ exports.register = async (req, res) => {
   }
 };
 
+
+
+// exports.register = async (req, res) => {
+//   const { name, email, password, university, role } = req.body;
+
+//   try {
+//     const existing = await User.findOne({ email });
+//     if (existing) {
+//       return res.status(400).json({ msg: "Email already exists" });
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const user = new User({
+//       name,
+//       email,
+//       password: hashedPassword,
+//       university, 
+//       role: role || 'user'
+//     });
+
+//     await user.save();
+//     res.status(201).json({ msg: "User registered successfully" });
+
+//   } catch (err) {
+//     console.error("Register Error:", err);
+//     res.status(500).json({ msg: "Server error", error: err.message });
+//   }
+// };
+
 // 📌 Login an existing user
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate('university');
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
