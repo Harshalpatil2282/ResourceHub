@@ -1,6 +1,8 @@
 // src/components/admin/UniversityForm.js
 import React, { useState } from 'react';
 import API from '../../services/api';
+import ThemeToggle from '../common/ThemeToggle';
+// import { useTheme } from '../context/ThemeContext';
 
 function UniversityForm() {
   const [name, setName] = useState('');
@@ -18,7 +20,11 @@ function UniversityForm() {
   };
 
   return (
+    
     <div>
+      <div>
+          <ThemeToggle /> {/* top-right dark/light toggle */}
+        </div>
       <h3>Create University</h3>
       <form onSubmit={handleSubmit}>
         <input
