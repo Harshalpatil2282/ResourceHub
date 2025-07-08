@@ -43,7 +43,7 @@ exports.uploadFile = async (req, res) => {
       return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
-            folder: `university_resource_hub/${folder.university.name}/${folder.program.name}/${folder.name}`,
+            folder: `university_resource_hub/${folder.university.name}/${folder.program.name}/${folder.name}`.trim(),
             resource_type: "raw",
             access_mode: "public",
             chunk_size: 6000000,
