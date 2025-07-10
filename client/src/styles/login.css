@@ -181,3 +181,16 @@ body, html {
   background: #203a43;
   color: #fff;
 }
+.password-field {
+  position: relative;
+}
+
+.password-field .toggle-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.2rem;
+}

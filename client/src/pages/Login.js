@@ -8,6 +8,7 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
@@ -62,14 +63,21 @@ function Login() {
               required
             />
           </div>
-          <div className="input-field">
+          <div className="input-field password-field">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="🔒 Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <span
+              className="toggle-eye"
+              onClick={() => setShowPassword(!showPassword)}
+              title={showPassword ? "Hide Password" : "Show Password"}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
           </div>
           <button type="submit" className="button">Login Now</button>
           {msg && <p className="error-msg">{msg}</p>}

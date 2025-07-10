@@ -8,6 +8,7 @@ function Register() {
   const [msg, setMsg] = useState('');
   const [universities, setUniversities] = useState([]);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     API.get('/universities').then(res => setUniversities(res.data));
@@ -66,16 +67,23 @@ function Register() {
               required
             />
           </div>
-          <div className="input-field">
+          <div className="input-field password-field">
             <input
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="🔒 Password"
               value={form.password}
               onChange={handleChange}
               required
             />
+            <span
+              className="toggle-eye"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
           </div>
+
           <div className="input-field">
             <select
               name="university"
