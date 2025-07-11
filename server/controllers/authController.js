@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
 // 📌 Login an existing user
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  console.log('Login request for:', email);
+ 
 
   try {
     const user = await User.findOne({ email }).populate('university');
