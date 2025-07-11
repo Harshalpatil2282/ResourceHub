@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import '../styles/login.css';
 import { useTheme } from '../context/ThemeContext'; // adjust path if needed
+import Loader from '../component/Loader';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -21,6 +23,8 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMsg('');
     try {
       const res = await API.post('/auth/login', { email, password });
       const { token, user } = res.data;
@@ -40,6 +44,7 @@ function Login() {
 
   return (
     <div className="login-container">
+      {loading && <Loader />}
       <div className="blob blob1"></div>
       <div className="blob blob2"></div>
       <div className="card">

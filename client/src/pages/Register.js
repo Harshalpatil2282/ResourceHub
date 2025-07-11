@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import '../styles/login.css';
+import Loader from '../component/Loader';
 
 function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', university: '', role: 'user' });
@@ -9,6 +10,8 @@ function Register() {
   const [universities, setUniversities] = useState([]);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     API.get('/universities').then(res => setUniversities(res.data));
@@ -18,6 +21,7 @@ function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setMsg('');
     try {
       const res = await API.post('/auth/register', form);
@@ -35,6 +39,8 @@ function Register() {
 
   return (
     <div className="login-container">
+      {loading && <Loader />}
+
       <div className="blob blob1"></div>
       <div className="blob blob2"></div>
       <div className="card">
