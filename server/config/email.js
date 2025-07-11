@@ -10,6 +10,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+
 const sendVerificationEmail = async (to, link) => {
   try {
     await transporter.sendMail({
