@@ -5,13 +5,16 @@ import AdminDashboard from './pages/AdminDashboard';
 import UserViewPage from './pages/UserViewPage';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 
 function App() {
-  
+
   return (
-    
+
     <Router>
-      
+
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
@@ -31,10 +34,13 @@ function App() {
           }
         />
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route path='/register' element={<Register/>}/>
+        <Route path='/register' element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/verify-email/:token" element={<VerifyEmail />} />
       </Routes>
     </Router>
-    
+
   );
 }
 

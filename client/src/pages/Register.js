@@ -21,20 +21,17 @@ function Register() {
     setMsg('');
     try {
       const res = await API.post('/auth/register', form);
-      if (res.data && res.data.token) {
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('role', res.data.user.role);
-        localStorage.setItem('userId', res.data.user.id);
-        localStorage.setItem('university', res.data.user.university);
-        alert("Regestered Successfully");
-        navigate('/user');
+      if (res.data && res.data.user) {
+        alert("Registered successfully. Please verify your email before logging in.");
+        navigate('/login');
       } else {
-        setMsg('❌ Registration failed. No token received.');
+        setMsg('❌ Registration failed. Try again.');
       }
     } catch (err) {
       setMsg(err.response?.data?.msg || '❌ Registration failed. Try again.');
     }
   };
+
 
   return (
     <div className="login-container">

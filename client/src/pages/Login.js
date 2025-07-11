@@ -79,7 +79,12 @@ function Login() {
               {showPassword ? "🙈" : "👁️"}
             </span>
           </div>
+          
+          
           <button type="submit" className="button">Login Now</button>
+          <div className="switch-link">
+            <button onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
+          </div>
           {msg && <p className="error-msg">{msg}</p>}
         </form>
         <div className="switch-link">
