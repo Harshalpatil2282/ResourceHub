@@ -39,6 +39,8 @@ function Login() {
       }
     } catch (err) {
       setMsg('❌ Login failed. Check your credentials.');
+    }finally {
+      setLoading(false);
     }
   };
 

@@ -33,6 +33,8 @@ function Register() {
       }
     } catch (err) {
       setMsg(err.response?.data?.msg || '❌ Registration failed. Try again.');
+    }finally {
+      setLoading(false);
     }
   };
 
