@@ -25,7 +25,7 @@ function Home() {
           className="main-button"
           onClick={() => navigate('/User')}
         >
-          Visit Main Site
+          Go to Resources
         </button>
         </div>
       </div>
