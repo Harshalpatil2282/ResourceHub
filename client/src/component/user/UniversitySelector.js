@@ -15,11 +15,12 @@ function UniversitySelector({ onSelect }) {
   }, []);
 
   const gradientList = [
-    "linear-gradient(135deg, #ff416c, #ff4b2b)",
-    "linear-gradient(135deg, #6a11cb, #2575fc)",
+    "linear-gradient(135deg, #a50026ee, #ff4081)",
+    "linear-gradient(135deg, #FFA07A, #ff0061)",
+    "linear-gradient(135deg, #007cbe, #fff24E)",
     "linear-gradient(135deg, #11998e, #38ef7d)",
+    "linear-gradient(135deg, #00c6ff, #0072ff)",
     "linear-gradient(135deg, #f7971e, #ffd200)",
-    "linear-gradient(135deg, #00c6ff, #0072ff)"
   ];
 
   return (

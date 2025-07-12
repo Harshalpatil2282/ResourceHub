@@ -14,7 +14,9 @@ function FolderList({ programId, onSelect }) {
       .catch(err => console.error(err));
   }, [programId]);
 
-  const gradient = "linear-gradient(135deg, #ff9966, #ff5e62)";
+  const gradient = "linear-gradient(135deg,  #ff4081)";
+    
+  
 
   return (
     <div>

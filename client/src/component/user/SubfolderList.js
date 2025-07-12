@@ -22,10 +22,11 @@ function SubfolderList({ parentFolderId, onSelect }) {
 
   // You can use a gradient list or a single gradient as you like
   const gradientList = [
-    "linear-gradient(135deg, #ff9966, #ff5e62)",
     "linear-gradient(135deg, #36d1c4, #1e3c72)",
-    "linear-gradient(135deg, #f7971e, #ffd200)",
-    "linear-gradient(135deg, #00c6ff, #0072ff)"
+    "linear-gradient(135deg, #007cbe, #fff24E)",
+    "linear-gradient(135deg, #414288, #b0db43)",
+    "linear-gradient(135deg, #629460, #f4d35e)",
+    "linear-gradient(135deg, #e57a44, #251351)",
   ];
 
   return (

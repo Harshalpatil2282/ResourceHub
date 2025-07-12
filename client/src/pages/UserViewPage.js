@@ -86,7 +86,7 @@ function UserDashboard() {
               maxWidth: '400px'
             }}
           >
-            Your one-stop academic resource hub for PYQs, PDFs, Notes, PPTs, and more.<br />
+            Your one-stop academic resource hub for PYQs, PDFs, Notes, PPTs, and more.<br /><br />
             Access semester-wise notes, files, and more — all in one place.
           </p>
         </div>
@@ -180,39 +180,48 @@ function UserDashboard() {
           textAlign: 'center',
           marginTop: '40px',
           marginBottom: '10px',
-          fontFamily: "'Pacifico', cursive",
+          fontFamily: "'Pacifico'",
           fontSize: '1.1rem',
-          color: theme === 'dark' ? '#fff' : '#111', // fallback for other letters
+          color: theme === 'dark' ? '#fff' : '#111',
           opacity: 0.85,
-          letterSpacing: '1px'
+          letterSpacing: '1px',
+          cursor: 'pointer'
         }}
       >
         Created by{' '}
-        <span style={{
-          color: '#ff416c', // red for  
-          fontFamily: "'Pacifico', cursive"
-        }}>
-          H
-        </span>
-        <span style={{
-          color: theme === 'dark' ? '#fff' : '#111',
-          fontFamily: "'Pacifico', cursive"
-        }}>
-          arshal{' '}
-        </span>
-        <span style={{
-          color: '#ff416c', // red for P
-          fontFamily: "'Pacifico', cursive"
-        }}>
-          P
-        </span>
-        <span style={{
-          color: theme === 'dark' ? '#fff' : '#111',
-          fontFamily: "'Pacifico', cursive"
-        }}>
-          atil
-        </span>
+        <a
+          href="https://hp-portfolio-ujjo.onrender.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: 'none' }}
+        >
+          <span style={{
+            color: '#ff416c',
+            fontFamily: "'Pacifico', cursive"
+          }}>
+            H
+          </span>
+          <span style={{
+            color: theme === 'dark' ? '#fff' : '#111',
+            fontFamily: "'Pacifico', cursive"
+          }}>
+            arshal{' '}
+          </span>
+          <span style={{
+            color: '#ff416c',
+            fontFamily: "'Pacifico', cursive"
+          }}>
+            P
+          </span>
+          <span style={{
+            color: theme === 'dark' ? '#fff' : '#111',
+            fontFamily: "'Pacifico', cursive"
+          }}>
+            atil
+          </span>
+        </a>
       </div>
+
     </div>
 
   );

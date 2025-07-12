@@ -17,8 +17,9 @@ function ProgramList({ universityId, onSelect }) {
 
   const gradientList = [
     "linear-gradient(135deg, #ff416c, #ff4b2b)",
-    "linear-gradient(135deg, #6a11cb, #2575fc)",
+    "linear-gradient(135deg, #36d1c4, #1e3c72)",
     "linear-gradient(135deg, #11998e, #38ef7d)",
+    "linear-gradient(135deg, #6a11cb, #2575fc)",
     "linear-gradient(135deg, #f7971e, #ffd200)"
   ];
 
