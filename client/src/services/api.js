@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://resourcehub-7u3d.onrender.com',
+  baseURL: 'https://resourcehub-7u3d.onrender.com/api',
 });
 
 API.interceptors.request.use((config) => {
