@@ -12,6 +12,13 @@ API.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+API.interceptors.response.use(
+  res => res,
+  err => {
+    console.error('API Error:', err.response?.status, err.response?.data);
+    return Promise.reject(err);
+  }
+);
 
 // src/services/api.js
 export const getFilesByFolder = async (folderId) => {
