@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const fileSchema = new mongoose.Schema({
   name: String,
   type: String, // pdf, docx, ppt, image
-  url: String, // Cloudinary or S3 URL
+  url: String, // Cloudinary 
   folderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Folder',

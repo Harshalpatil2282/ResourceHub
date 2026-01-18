@@ -40,26 +40,32 @@ exports.uploadFile = async (req, res) => {
 
     // Upload using stream
     const streamUpload = (req) => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: `university_resource_hub/${folder.university.name}/${folder.program.name}/${folder.name}`.trim(),
-            resource_type: "raw",
-            access_mode: "public",
-            chunk_size: 6000000,
-            timeout: 600000
-          },
-          (error, result) => {
-            if (result) {
-              resolve(result);
-            } else {
-              reject(error);
-            }
-          }
-        );
-        stream.end(req.file.buffer);
-      });
-    };
+  return new Promise((resolve, reject) => {
+    const folderPath = [
+      "university_resource_hub",
+      folder.university.name,
+      folder.program.name,
+      folder.name
+    ].join("/");
+
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: folderPath,
+        resource_type: "raw",     // RAW for docs / pdfs / pptxs
+        use_filename: true,       // keep original file name
+        unique_filename: false,   // no random suffix
+        overwrite: true,
+        flags: "attachment"       // force attachment header
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    uploadStream.end(req.file.buffer);
+  });
+};
+
 
     const result = await streamUpload(req);
 

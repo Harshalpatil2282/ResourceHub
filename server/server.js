@@ -25,6 +25,7 @@ const programRoutes = require('./routes/programRoutes');
 const folderRoutes = require('./routes/folderRoutes');
 const fileRoutes = require('./routes/fileRoutes');
 const activityRoutes = require('./routes/activityRoutes');
+const visitorRoutes = require('./routes/visitorRoutes');
 
 
 // More routes will be added later...
@@ -36,6 +37,7 @@ app.use('/api/programs', programRoutes);
 app.use('/api/folders', folderRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/activities' , activityRoutes);
+app.use('/api/visitor', visitorRoutes);
 
 app.use(express.static(path.join(_dirname, "..","client/build")));
 app.get("*", (_, res) => {

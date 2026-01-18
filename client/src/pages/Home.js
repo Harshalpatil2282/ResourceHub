@@ -23,7 +23,7 @@ function Home() {
         <div className="buttons">
         <button
           className="main-button"
-          onClick={() => navigate('/User')}
+          onClick={() => navigate('/user')}
         >
           Go to Resources
         </button>
