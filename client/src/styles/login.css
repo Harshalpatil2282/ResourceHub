@@ -194,3 +194,55 @@ body, html {
   user-select: none;
   font-size: 1.2rem;
 }
+
+/* Disabled state for all login buttons */
+.button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* OR divider between login and guest button */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 16px 0 12px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.divider span {
+  padding: 0 12px;
+}
+
+/* Guest login button — outlined variant */
+.guest-button {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #e0e0e0;
+  margin-top: 0;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.guest-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.75);
+  color: #fff;
+  transform: scale(1.02);
+}
+
+/* Subtle hint text below the guest button */
+.guest-hint {
+  font-size: 12px !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  margin: 6px 0 14px !important;
+  text-align: center;
+}

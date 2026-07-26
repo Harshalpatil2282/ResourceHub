@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import UniversitySelector from '../component/user/UniversitySelector';
 import ProgramList from '../component/user/ProgramList';
@@ -21,6 +22,10 @@ function UserDashboard() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { theme } = useTheme();
+  const navigate = useNavigate();
+
+  // Detect guest session
+  const isGuest = localStorage.getItem('role') === 'guest';
 
   const clearBelow = (level) => {
     if (level === 'university') {
@@ -63,8 +68,68 @@ function UserDashboard() {
     return () => clearTimeout(debounce);
   }, [selectedFolder, selectedSubfolder, searchQuery]);
 
+  // Logout: clear all stored session data and redirect to login
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('university');
+    navigate('/login');
+  };
+
   return (
     <div className="dashboard-container">
+      {/* Guest session banner */}
+      {isGuest && (
+        <div style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: '#fff',
+          padding: '10px 20px',
+          borderRadius: '10px',
+          marginBottom: '16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '10px',
+          fontSize: '14px',
+          boxShadow: '0 2px 12px rgba(102,126,234,0.3)'
+        }}>
+          <span>👤 You're browsing as a <strong>Guest</strong>. Register to contribute resources and save your progress.</span>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => navigate('/register')}
+              style={{
+                background: '#fff',
+                color: '#667eea',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '6px 14px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              Register Free
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{
+                background: 'rgba(255,255,255,0.18)',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.5)',
+                borderRadius: '6px',
+                padding: '6px 14px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              Exit Guest
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1
@@ -90,10 +155,31 @@ function UserDashboard() {
             Access semester-wise notes, files, and more — all in one place.
           </p>
         </div>
-        <div>
-          <ThemeToggle /> {/* top-right dark/light toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <ThemeToggle />
+          {/* Logout button for all users */}
+          {!isGuest && (
+            <button
+              onClick={handleLogout}
+              title="Logout"
+              style={{
+                background: 'rgba(255,65,108,0.12)',
+                color: '#ff416c',
+                border: '1px solid rgba(255,65,108,0.35)',
+                borderRadius: '8px',
+                padding: '7px 14px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '13px',
+                transition: 'background 0.2s ease'
+              }}
+            >
+              🚪 Logout
+            </button>
+          )}
         </div>
       </div>
+
 
 
       <hr />

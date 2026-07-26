@@ -1,8 +1,11 @@
 // src/services/api.js
 import axios from 'axios';
 
+// Use env var for flexibility across environments.
+// Production (Render): set REACT_APP_API_URL=https://resourcehub-7u3d.onrender.com/api
+// Local dev: set REACT_APP_API_URL=http://localhost:5000/api in client/.env
 const API = axios.create({
-  baseURL: 'https://resourcehub-7u3d.onrender.com/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://resourcehub-7u3d.onrender.com/api',
 });
 
 API.interceptors.request.use((config) => {

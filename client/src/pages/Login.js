@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import '../styles/login.css';
-import { useTheme } from '../context/ThemeContext'; // adjust path if needed
+import { useTheme } from '../context/ThemeContext';
 import Loader from '../component/Loader';
 
 function Login() {
@@ -10,6 +10,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -21,6 +22,7 @@ function Login() {
     // eslint-disable-next-line
   }, []); // Only run on mount
 
+  // Standard email/password login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -38,15 +40,34 @@ function Login() {
         navigate('/user');
       }
     } catch (err) {
-      setMsg('❌ Login failed. Check your credentials.');
-    }finally {
+      setMsg(err.response?.data?.msg || '❌ Login failed. Check your credentials.');
+    } finally {
       setLoading(false);
+    }
+  };
+
+  // One-click guest access — no registration required
+  const handleGuestLogin = async () => {
+    setGuestLoading(true);
+    setMsg('');
+    try {
+      const res = await API.post('/auth/guest-login');
+      const { token, user } = res.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', user.role);
+      localStorage.setItem('userId', user.id);
+      localStorage.removeItem('university'); // guests have no university
+      navigate('/user');
+    } catch (err) {
+      setMsg('❌ Guest access failed. Please try again.');
+    } finally {
+      setGuestLoading(false);
     }
   };
 
   return (
     <div className="login-container">
-      {loading && <Loader />}
+      {(loading || guestLoading) && <Loader />}
       <div className="blob blob1"></div>
       <div className="blob blob2"></div>
       <div className="card">
@@ -86,17 +107,36 @@ function Login() {
               {showPassword ? "🙈" : "👁️"}
             </span>
           </div>
-          
-          
-          <button type="submit" className="button">Login Now</button>
+
+          <button type="submit" className="button" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login Now'}
+          </button>
           <div className="switch-link">
-            <button onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
+            <button type="button" onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
           </div>
           {msg && <p className="error-msg">{msg}</p>}
         </form>
+
+        {/* Separator */}
+        <div className="divider">
+          <span>or</span>
+        </div>
+
+        {/* One-click guest access */}
+        <button
+          id="guest-login-btn"
+          className="button guest-button"
+          onClick={handleGuestLogin}
+          disabled={guestLoading}
+          title="Browse resources without an account"
+        >
+          {guestLoading ? '⏳ Entering as Guest...' : '👤 Continue as Guest'}
+        </button>
+        <p className="guest-hint">No registration needed — browse all resources instantly</p>
+
         <div className="switch-link">
-          <span>Don’t have an account? </span>
-          <button onClick={() => navigate('/register')}>Register Now</button>
+          <span>Don't have an account? </span>
+          <button type="button" onClick={() => navigate('/register')}>Register Now</button>
         </div>
       </div>
     </div>
