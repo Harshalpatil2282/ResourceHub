@@ -147,12 +147,12 @@ const AdminDashboard = () => {
 
   const fetchMessages = async () => {
     try {
-      const res = await API.get('/api/visitor/all-messages');
+      const res = await API.get('/visitor/all-messages');
       setMessages(res.data);
-      const unreadRes = await API.get('/api/visitor/unread-count');
+      const unreadRes = await API.get('/visitor/unread-count');
       setUnreadCount(unreadRes.data.count || 0);
     } catch (err) {
-      console.error(err);
+      console.error(err); // messages may not exist on first load
     }
   };
 
@@ -229,7 +229,7 @@ const AdminDashboard = () => {
 
   const handleReplyMessage = async (id) => {
     try {
-      await API.put(`/api/visitor/${id}/reply`, { replyMessage: replyText });
+      await API.put(`/visitor/${id}/reply`, { replyMessage: replyText });
       showToast('Reply sent');
       setReplyMessageId(null);
       setReplyText('');
@@ -241,7 +241,7 @@ const AdminDashboard = () => {
 
   const handleDeleteMessage = async (id) => {
     try {
-      await API.delete(`/api/visitor/${id}`);
+      await API.delete(`/visitor/${id}`);
       showToast('Message deleted');
       setConfirmDeleteMessage(null);
       fetchMessages();
