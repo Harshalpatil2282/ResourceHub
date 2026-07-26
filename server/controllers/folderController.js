@@ -135,12 +135,19 @@ exports.getSubfolders = async (req, res) => {
 };
 exports.getFoldersByUser = async (req, res) => {
   try {
+    const parentId = req.query.parentId || null;
+
+    // --- Guest path: no user lookup needed ---
+    if (req.user.role === 'guest') {
+      const folders = await Folder.find({ parentFolderId: parentId });
+      return res.json(folders);
+    }
+
+    // --- Registered user path: scoped to university ---
     const user = await User.findById(req.user.userId);
     if (!user || !user.university) {
       return res.status(403).json({ msg: 'Unauthorized or missing university' });
     }
-
-    const parentId = req.query.parentId || null;
 
     const folders = await Folder.find({
       university: user.university,
