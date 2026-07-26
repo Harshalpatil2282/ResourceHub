@@ -8,12 +8,25 @@ dotenv.config();
 
 
 const app = express();
-app.use(cors(
-  {
-    origin: process.env.CLIENT_URL,
-    credentials: true
-  }
-));
+
+// Allow requests from both local dev (localhost:3000) and production (CLIENT_URL)
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.CLIENT_URL
+].filter(Boolean); // removes undefined/null if CLIENT_URL isn't set
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow server-to-server requests (no origin) and whitelisted origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 const _dirname = path.resolve();
