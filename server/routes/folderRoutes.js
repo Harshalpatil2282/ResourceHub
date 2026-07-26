@@ -24,10 +24,10 @@ router.get('/university/:universityId', async (req, res) => {
 router.post('/', verifyToken, checkRole(['admin']), createFolder);
 
 // Get all root folders (semesters) under a program
-router.get('/program/:programId', verifyToken, checkRole(['admin', 'user']), getFoldersByProgram);
+router.get('/program/:programId', verifyToken, checkRole(['admin', 'user', 'guest']), getFoldersByProgram);
 
 // Get subfolders under a specific folder
-router.get('/subfolders/:parentFolderId', verifyToken, checkRole(['admin', 'user']), getSubfolders);
+router.get('/subfolders/:parentFolderId', verifyToken, checkRole(['admin', 'user', 'guest']), getSubfolders);
 router.get('/user', verifyToken, checkRole(['user']), getFoldersByUser);
 router.get('/all', verifyToken, checkRole(['admin']), getAllFolders);
 router.get('/detailed', verifyToken, checkRole(['admin']), getAllFoldersDetailed);

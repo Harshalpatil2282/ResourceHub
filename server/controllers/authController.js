@@ -182,3 +182,31 @@ exports.verifyEmail = async (req, res) => {
     res.status(500).json({ msg: "Server error", error: err.message });
   }
 };
+
+// 📌 Guest Login — issues a short-lived read-only JWT (no account required)
+exports.guestLogin = async (req, res) => {
+  try {
+    // Generate a unique guest session identifier
+    const guestId = crypto.randomBytes(8).toString('hex');
+
+    const token = jwt.sign(
+      { userId: `guest_${guestId}`, role: 'guest' },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(200).json({
+      token,
+      user: {
+        id: `guest_${guestId}`,
+        name: 'Guest',
+        email: null,
+        role: 'guest',
+        university: null
+      }
+    });
+  } catch (err) {
+    console.error("Guest Login Error:", err);
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
+};

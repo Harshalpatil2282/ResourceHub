@@ -13,9 +13,9 @@ const {
 const {uploadFile} = require('../controllers/uploadController');
 const { verifyToken , checkRole } = require('../middleware/auth');
 router.post('/upload', verifyToken, checkRole(['admin']), upload.single('file'), uploadFile);
-router.get('/user', verifyToken, checkRole(['user']), getFilesByUser);
-router.get('/folder/:folderId', verifyToken, getFilesByFolder);
-router.get('/search', verifyToken, checkRole(['user']), searchFilesByUser);
+router.get('/user', verifyToken, checkRole(['user', 'guest']), getFilesByUser);
+router.get('/folder/:folderId', verifyToken, checkRole(['admin', 'user', 'guest']), getFilesByFolder);
+router.get('/search', verifyToken, checkRole(['user', 'guest']), searchFilesByUser);
 router.delete('/:id', verifyToken, checkRole(['admin']), uploadController.deleteFile);
 router.put('/:id', verifyToken, checkRole(['admin']), uploadController.updateFile);
 
