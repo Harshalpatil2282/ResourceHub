@@ -28,11 +28,20 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    const verificationLink = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
-    await sendVerificationEmail(user.email, verificationLink);
+    // Attempt to send verification email — non-blocking (user is still created)
+    let emailSent = true;
+    try {
+      const verificationLink = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+      await sendVerificationEmail(user.email, verificationLink);
+    } catch (emailErr) {
+      console.error("Verification email failed:", emailErr.message);
+      emailSent = false;
+    }
 
     return res.status(201).json({
-      msg: 'User registered. Verification email sent.',
+      msg: emailSent
+        ? 'User registered. Please check your email to verify your account.'
+        : 'User registered, but the verification email could not be sent. Please contact support.',
       user: {
         id: user._id,
         email: user.email,
@@ -92,12 +101,11 @@ exports.login = async (req, res) => {
 // 📌 Forgot Password
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
-  
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("User not found for forgot password.");
-      return res.status(404).json({ msg: 'User not found' });
+      return res.status(404).json({ msg: 'No account found with that email address' });
     }
 
     const token = crypto.randomBytes(32).toString('hex');
@@ -105,11 +113,17 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordTokenExpires = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
-    const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
-    
-    await sendResetPasswordEmail(user.email, resetLink);
-
-    res.json({ msg: 'Password reset link sent to your email' });
+    // Attempt to send reset email — if it fails, return a clear error
+    try {
+      const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
+      await sendResetPasswordEmail(user.email, resetLink);
+      res.json({ msg: 'Password reset link sent to your email. Please check your inbox.' });
+    } catch (emailErr) {
+      console.error("Reset email failed:", emailErr.message);
+      res.status(500).json({
+        msg: 'Could not send reset email. Please try again later or contact support.'
+      });
+    }
   } catch (err) {
     console.error("Error in forgot password route:", err);
     res.status(500).json({ msg: 'Server error', error: err.message });
