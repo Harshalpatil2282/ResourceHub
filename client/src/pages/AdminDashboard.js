@@ -105,16 +105,8 @@ const AdminDashboard = () => {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fetchFoldersByProg = useCallback(async (progId) => {
-    if (!progId) { setFolders([]); return; }
-    try {
-      const res = await API.get('/folders/detailed');
-      setFolders(res.data.filter(f => f.program && f.program._id === progId));
-    } catch (err) {
-      showToast('Failed to load folders', 'error');
-    }
-  }, []);
+
+
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchAllFoldersDetailed = useCallback(async () => {

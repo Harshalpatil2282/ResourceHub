@@ -12,20 +12,19 @@ Modal.setAppElement('#root');
  * - Images → direct <img>
  * - Everything else → Google Docs Viewer as fallback
  */
-function getViewerUrl(fileUrl, fileType, fileName) {
+function getViewerUrl(fileUrl, fileType) {
   const type = (fileType || '').toLowerCase();
-  const name = (fileName || '').toLowerCase();
 
   // Images render natively
   if (type.includes('image')) return null; // signal to render <img>
 
-  // Always route docs through Google Docs Viewer — it handles PDFs,
+  // Always route docs through Google Docs Viewer — handles PDFs,
   // PPT, PPTX, DOC, DOCX and strips Cloudinary attachment headers.
   return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
 }
 
 function PreviewModal({ isOpen, onRequestClose, fileUrl, fileType, fileName }) {
-  const viewerUrl = getViewerUrl(fileUrl, fileType, fileName);
+  const viewerUrl = getViewerUrl(fileUrl, fileType);
   const isImage = (fileType || '').toLowerCase().includes('image');
 
   return (
