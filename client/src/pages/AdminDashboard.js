@@ -36,6 +36,8 @@ const AdminDashboard = () => {
   const [fileNavSubjects, setFileNavSubjects] = useState([]);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Multi-file upload queue: [{id, file, status:'pending'|'uploading'|'done'|'error', error:''}]
+  const [uploadQueue, setUploadQueue] = useState([]);
 
   // Inline Confirmations
   const [confirmDeleteFile, setConfirmDeleteFile] = useState(null);
@@ -193,30 +195,56 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUploadFile = async (e) => {
-    e.preventDefault();
-    if (!selectedFile || !uploadData.folderId) return;
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('folderId', uploadData.folderId);
-    formData.append('canDownload', uploadData.canDownload);
-    setUploading(true);
-    try {
-      await API.post('/files/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      showToast('✅ File uploaded successfully');
-      setSelectedFile(null);
-      const inp = document.getElementById('adminFileInput');
-      if (inp) inp.value = '';
-      fetchFiles(uploadData.folderId);
-    } catch (err) {
-      showToast('❌ Upload failed: ' + (err.response?.data?.msg || err.message), 'error');
-    } finally {
-      setUploading(false);
-    }
+  /** Add files to the queue (deduplicated by name+size) */
+  const addFilesToQueue = (fileList) => {
+    const incoming = Array.from(fileList).map(f => ({
+      id: `${f.name}-${f.size}-${Date.now()}-${Math.random()}`,
+      file: f,
+      status: 'pending',
+      error: ''
+    }));
+    setUploadQueue(prev => [
+      ...prev,
+      ...incoming.filter(inc =>
+        !prev.some(p => p.file.name === inc.file.name && p.file.size === inc.file.size && p.status === 'pending')
+      )
+    ]);
   };
 
+  /** Update a single queue item's status/error by id */
+  const setQueueItem = (id, patch) =>
+    setUploadQueue(prev => prev.map(item => item.id === id ? { ...item, ...patch } : item));
+
+  /** Sequential upload — processes every 'pending' item one-by-one */
+  const handleQueueUpload = async (e) => {
+    if (e) e.preventDefault();
+    if (!uploadData.folderId) { showToast('Select a folder first', 'error'); return; }
+    const pending = uploadQueue.filter(q => q.status === 'pending');
+    if (pending.length === 0) { showToast('No pending files in queue', 'info'); return; }
+
+    setUploading(true);
+    for (const item of pending) {
+      setQueueItem(item.id, { status: 'uploading' });
+      const formData = new FormData();
+      formData.append('file', item.file);
+      formData.append('folderId', uploadData.folderId);
+      formData.append('canDownload', uploadData.canDownload);
+      try {
+        await API.post('/files/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        setQueueItem(item.id, { status: 'done' });
+      } catch (err) {
+        const msg = err.response?.data?.msg || err.message || 'Upload failed';
+        setQueueItem(item.id, { status: 'error', error: msg });
+      }
+    }
+    setUploading(false);
+    // Refresh file list and clear completed
+    fetchFiles(uploadData.folderId);
+    showToast(`✅ ${pending.length} file(s) processed`);
+    // Reset the file input
+    const inp = document.getElementById('adminFileInput');
+    if (inp) inp.value = '';
+  };
 
   const handleDeleteFile = async (id) => {
     try {
@@ -689,102 +717,162 @@ const AdminDashboard = () => {
 
                 {uploadData.folderId && (
                   <div style={{ marginBottom: '24px' }}>
+                    {/* Target banner */}
                     <div style={{ marginBottom: '12px', padding: '10px 16px', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                       📌 Uploading to: <strong>
                         {fileNav.subjectId
                           ? `${fileNavSemesters.find(s=>s._id===fileNav.semId)?.name} › ${fileNavSubjects.find(s=>s._id===fileNav.subjectId)?.name}`
-                          : fileNavSemesters.find(s=>s._id===fileNav.semId)?.name
-                        }
+                          : fileNavSemesters.find(s=>s._id===fileNav.semId)?.name}
                       </strong>
                     </div>
 
-                    <form onSubmit={handleUploadFile}>
-                      <div
-                        id="dropZone"
-                        onDragOver={e => { e.preventDefault(); e.stopPropagation(); setDragOver(true); }}
-                        onDragEnter={e => { e.preventDefault(); e.stopPropagation(); setDragOver(true); }}
-                        onDragLeave={e => { e.preventDefault(); e.stopPropagation(); setDragOver(false); }}
-                        onDrop={e => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setDragOver(false);
-                          const dropped = e.dataTransfer.files[0];
-                          if (dropped) setSelectedFile(dropped);
-                        }}
-                        onClick={() => document.getElementById('adminFileInput').click()}
-                        style={{
-                          border: `2px dashed ${dragOver ? 'var(--accent-start)' : selectedFile ? '#10b981' : 'var(--border)'}`,
-                          borderRadius: '12px',
-                          padding: '40px 20px',
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          background: dragOver
-                            ? 'rgba(99,102,241,0.08)'
-                            : selectedFile
-                              ? 'rgba(16,185,129,0.06)'
-                              : 'rgba(255,255,255,0.02)',
-                          transition: 'all 0.2s ease',
-                          marginBottom: '16px',
-                        }}
-                      >
-                        <div style={{ fontSize: '2.5rem', marginBottom: '10px' }}>
-                          {dragOver ? '📂' : selectedFile ? '✅' : '☁️'}
-                        </div>
-                        <div style={{ color: selectedFile ? '#10b981' : 'var(--text-secondary)', fontWeight: 600 }}>
-                          {dragOver
-                            ? 'Drop it here!'
-                            : selectedFile
-                              ? selectedFile.name
-                              : 'Drag & Drop a file here, or click to browse'}
-                        </div>
-                        {selectedFile && (
-                          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
-                            {(selectedFile.size / 1024).toFixed(1)} KB · {selectedFile.type || 'unknown type'}
+                    {/* ── DRAG & DROP ZONE (multi-file) ── */}
+                    <div
+                      onDragOver={e => { e.preventDefault(); e.stopPropagation(); setDragOver(true); }}
+                      onDragEnter={e => { e.preventDefault(); e.stopPropagation(); setDragOver(true); }}
+                      onDragLeave={e => { e.preventDefault(); e.stopPropagation(); setDragOver(false); }}
+                      onDrop={e => {
+                        e.preventDefault(); e.stopPropagation(); setDragOver(false);
+                        if (e.dataTransfer.files.length > 0) addFilesToQueue(e.dataTransfer.files);
+                      }}
+                      onClick={() => document.getElementById('adminFileInput').click()}
+                      style={{
+                        border: `2px dashed ${dragOver ? 'var(--accent-start)' : 'var(--border)'}`,
+                        borderRadius: '12px', padding: '36px 20px', textAlign: 'center', cursor: 'pointer',
+                        background: dragOver ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)',
+                        transition: 'all 0.2s ease', marginBottom: '16px',
+                        userSelect: 'none',
+                      }}
+                    >
+                      <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>{dragOver ? '📂' : '☁️'}</div>
+                      <div style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.95rem' }}>
+                        {dragOver ? 'Drop files here!' : 'Drag & Drop multiple files, or click to browse'}
+                      </div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', marginTop: '4px' }}>PDF, PPT, PPTX, DOC, DOCX, Images, etc.</div>
+                      <input id="adminFileInput" type="file" multiple style={{ display: 'none' }}
+                        onChange={e => { if (e.target.files.length > 0) addFilesToQueue(e.target.files); }}
+                      />
+                    </div>
+
+                    {/* ── UPLOAD QUEUE ── */}
+                    {uploadQueue.length > 0 && (() => {
+                      const pending = uploadQueue.filter(q => q.status === 'pending').length;
+                      const done    = uploadQueue.filter(q => q.status === 'done').length;
+                      const errors  = uploadQueue.filter(q => q.status === 'error').length;
+                      const total   = uploadQueue.length;
+                      const progress = total > 0 ? Math.round(((done + errors) / total) * 100) : 0;
+                      return (
+                        <div style={{ marginBottom: '16px' }}>
+                          {/* Queue header */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                              <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>📋 Upload Queue ({total})</span>
+                              <span style={{ fontSize: '0.78rem', color: '#10b981' }}>✅ {done} done</span>
+                              {errors > 0 && <span style={{ fontSize: '0.78rem', color: '#ef4444' }}>❌ {errors} failed</span>}
+                              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>⏳ {pending} pending</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setUploadQueue(q => q.filter(i => i.status === 'pending' || i.status === 'uploading'))}
+                              style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: '6px', padding: '3px 10px', cursor: 'pointer', fontSize: '0.78rem' }}
+                            >Clear Done</button>
                           </div>
-                        )}
-                        <input
-                          id="adminFileInput"
-                          type="file"
-                          style={{ display: 'none' }}
-                          onChange={e => setSelectedFile(e.target.files[0])}
-                        />
-                      </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                        <label className="toggle-switch" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-                          <input
-                            type="checkbox"
-                            checked={uploadData.canDownload}
-                            onChange={e => setUploadData({ ...uploadData, canDownload: e.target.checked })}
-                          />
-                          <span className="toggle-slider"></span>
-                          <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>
-                            {uploadData.canDownload ? '✅ Allow Download' : '🔒 View Only'}
-                          </span>
-                        </label>
+                          {/* Overall progress bar */}
+                          {uploading && (
+                            <div style={{ height: '6px', borderRadius: '4px', background: 'rgba(255,255,255,0.08)', marginBottom: '12px', overflow: 'hidden' }}>
+                              <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg,var(--accent-start),var(--accent-end))', borderRadius: '4px', transition: 'width 0.4s ease' }} />
+                            </div>
+                          )}
 
+                          {/* Queue list */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '320px', overflowY: 'auto', paddingRight: '4px' }}>
+                            {uploadQueue.map((item, idx) => {
+                              const ext = item.file.name?.split('.').pop()?.toLowerCase() || '';
+                              const icon = ext === 'pdf' ? '📕' : ['ppt','pptx'].includes(ext) ? '📊' : ['doc','docx'].includes(ext) ? '📄' : ['jpg','jpeg','png','gif'].includes(ext) ? '🖼️' : '📁';
+                              const statusIcon = item.status === 'pending' ? '⏳' : item.status === 'uploading' ? '⬆️' : item.status === 'done' ? '✅' : '❌';
+                              const statusColor = item.status === 'pending' ? 'var(--text-secondary)' : item.status === 'uploading' ? '#6366f1' : item.status === 'done' ? '#10b981' : '#ef4444';
+                              const statusBg = item.status === 'pending' ? 'rgba(255,255,255,0.05)' : item.status === 'uploading' ? 'rgba(99,102,241,0.12)' : item.status === 'done' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+                              return (
+                                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '8px', background: statusBg, border: `1px solid ${statusColor}33`, transition: 'all 0.2s' }}>
+                                  {/* Position */}
+                                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', minWidth: '20px', textAlign: 'right' }}>#{idx + 1}</span>
+                                  {/* Icon */}
+                                  <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{icon}</span>
+                                  {/* Name + size */}
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {item.file.name}
+                                    </div>
+                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                                      {(item.file.size / 1024).toFixed(1)} KB
+                                      {item.status === 'error' && <span style={{ color: '#ef4444', marginLeft: '8px' }}>— {item.error}</span>}
+                                    </div>
+                                  </div>
+                                  {/* Status badge */}
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, color: statusColor, background: `${statusColor}22`, border: `1px solid ${statusColor}44`, whiteSpace: 'nowrap' }}>
+                                    {statusIcon} {item.status === 'uploading' ? 'Uploading…' : item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                                  </span>
+                                  {/* Remove button (pending only) */}
+                                  {item.status === 'pending' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setUploadQueue(q => q.filter(i => i.id !== item.id))}
+                                      title="Remove from queue"
+                                      style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1rem', padding: '2px 6px', borderRadius: '4px', lineHeight: 1 }}
+                                    >✕</button>
+                                  )}
+                                  {/* Retry button (error only) */}
+                                  {item.status === 'error' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setQueueItem(item.id, { status: 'pending', error: '' })}
+                                      title="Retry"
+                                      style={{ background: 'transparent', border: '1px solid #f97316', color: '#f97316', cursor: 'pointer', fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px' }}
+                                    >↺ Retry</button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* ── CONTROLS ── */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                      <label className="toggle-switch" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={uploadData.canDownload}
+                          onChange={e => setUploadData({ ...uploadData, canDownload: e.target.checked })} />
+                        <span className="toggle-slider"></span>
+                        <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                          {uploadData.canDownload ? '✅ Allow Download' : '🔒 View Only'}
+                        </span>
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={handleQueueUpload}
+                        className="btn-success"
+                        disabled={uploading || uploadQueue.filter(q => q.status === 'pending').length === 0}
+                        style={{ flex: 1, minWidth: '180px', opacity: (uploading || uploadQueue.filter(q=>q.status==='pending').length===0) ? 0.6 : 1 }}
+                      >
+                        {uploading
+                          ? `⏳ Uploading ${uploadQueue.filter(q=>q.status==='uploading').map((_,i)=>i+1)[0] || ''}…`
+                          : `⬆️ Upload All (${uploadQueue.filter(q=>q.status==='pending').length} files)`}
+                      </button>
+
+                      {uploadQueue.length > 0 && !uploading && (
                         <button
-                          type="submit"
-                          className="btn-success"
-                          disabled={!selectedFile || uploading}
-                          style={{ flex: 1, minWidth: '160px', opacity: (!selectedFile || uploading) ? 0.6 : 1 }}
-                        >
-                          {uploading ? '⏳ Uploading...' : '⬆️ Upload File'}
-                        </button>
-
-                        {selectedFile && (
-                          <button
-                            type="button"
-                            onClick={() => { setSelectedFile(null); document.getElementById('adminFileInput').value = ''; }}
-                            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}
-                          >
-                            ✕ Clear
-                          </button>
-                        )}
-                      </div>
-                    </form>
+                          type="button"
+                          onClick={() => { setUploadQueue([]); const inp = document.getElementById('adminFileInput'); if (inp) inp.value=''; }}
+                          style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer', fontSize: '0.85rem' }}
+                        >🗑 Clear All</button>
+                      )}
+                    </div>
                   </div>
                 )}
+
 
                 {uploadData.folderId && (
                   <div>
