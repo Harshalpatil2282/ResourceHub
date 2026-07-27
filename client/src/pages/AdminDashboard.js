@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   const [newProgram, setNewProgram] = useState({ name: '', universityId: '' });
   const [newFolder, setNewFolder] = useState({ name: '', universityId: '', programId: '', parentFolderId: '' });
   const [uploadData, setUploadData] = useState({ folderId: '', canDownload: true });
-  const [selectedFile, setSelectedFile] = useState(null);
+
 
   // Selection states for cascading dropdowns
   const [selectedUniForProg, setSelectedUniForProg] = useState('');
