@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import '../styles/AdminDashboard.css';
@@ -28,10 +28,6 @@ const AdminDashboard = () => {
 
   // Selection states for cascading dropdowns
   const [selectedUniForProg, setSelectedUniForProg] = useState('');
-  const [selectedUniForFold, setSelectedUniForFold] = useState('');
-  const [selectedProgForFold, setSelectedProgForFold] = useState('');
-  const [selectedUniForFile, setSelectedUniForFile] = useState('');
-  const [selectedProgForFile, setSelectedProgForFile] = useState('');
 
   // Inline Confirmations
   const [confirmDeleteFile, setConfirmDeleteFile] = useState(null);
@@ -51,26 +47,26 @@ const AdminDashboard = () => {
     if (window.innerWidth <= 768) setSidebarOpen(false);
   };
 
-  useEffect(() => {
-    fetchUniversities();
-    fetchMessages();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchUniversities(); fetchMessages(); }, []);
 
   useEffect(() => {
     if (activeTab === 'overview') fetchStats();
     if (activeTab === 'activity') fetchActivities();
     if (activeTab === 'folders') fetchAllFoldersDetailed();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   // Fetches
-  const fetchUniversities = async () => {
+  const fetchUniversities = useCallback(async () => {
     try {
       const res = await API.get('/universities');
       setUniversities(res.data);
     } catch (err) {
       showToast('Failed to load universities', 'error');
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -101,51 +97,51 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchFoldersByProg = async (progId) => {
-    if (!progId) {
-      setFolders([]);
-      return;
-    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchFoldersByProg = useCallback(async (progId) => {
+    if (!progId) { setFolders([]); return; }
     try {
       const res = await API.get('/folders/detailed');
       setFolders(res.data.filter(f => f.program && f.program._id === progId));
     } catch (err) {
       showToast('Failed to load folders', 'error');
     }
-  };
+  }, []);
 
-  const fetchAllFoldersDetailed = async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchAllFoldersDetailed = useCallback(async () => {
     try {
       const res = await API.get('/folders/detailed');
       setFolders(res.data);
     } catch (err) {
       showToast('Failed to load folders', 'error');
     }
-  }
+  }, []);
 
-  const fetchFiles = async (folderId) => {
-    if (!folderId) {
-      setFiles([]);
-      return;
-    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchFiles = useCallback(async (folderId) => {
+    if (!folderId) { setFiles([]); return; }
     try {
       const res = await API.get(`/files/folder/${folderId}`);
       setFiles(res.data);
     } catch (err) {
       showToast('Failed to load files', 'error');
     }
-  };
+  }, []);
 
-  const fetchActivities = async () => {
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchActivities = useCallback(async () => {
     try {
       const res = await API.get('/activities');
       setActivities(res.data);
     } catch (err) {
       showToast('Failed to load activities', 'error');
     }
-  };
+  }, []);
 
-  const fetchMessages = async () => {
+
+  const fetchMessages = useCallback(async () => {
     try {
       const res = await API.get('/visitor/all-messages');
       setMessages(res.data);
@@ -154,7 +150,8 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error(err); // messages may not exist on first load
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handlers
   const handleAddUniversity = async (e) => {
@@ -519,7 +516,6 @@ const AdminDashboard = () => {
                     className="glass-select"
                     onChange={e => {
                       fetchPrograms(e.target.value);
-                      setSelectedProgForFile('');
                     }}
                   >
                     <option value="">-- Select --</option>
@@ -531,7 +527,6 @@ const AdminDashboard = () => {
                   <select 
                     className="glass-select"
                     onChange={e => {
-                      setSelectedProgForFile(e.target.value);
                       fetchFoldersByProg(e.target.value);
                     }}
                   >
