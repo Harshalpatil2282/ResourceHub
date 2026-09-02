@@ -3,6 +3,7 @@
 # 📚 ResourceHub
 
 ### A University Academic Resource Management Platform
+### Actively Used By College Students
 
 **Live Demo → [https://resourcehub-7u3d.onrender.com/](https://resourcehub-7u3d.onrender.com/)**
 
