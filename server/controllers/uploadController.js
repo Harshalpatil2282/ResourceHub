@@ -40,31 +40,31 @@ exports.uploadFile = async (req, res) => {
 
     // Upload using stream
     const streamUpload = (req) => {
-  return new Promise((resolve, reject) => {
-    const folderPath = [
-      "university_resource_hub",
-      folder.university.name,
-      folder.program.name,
-      folder.name
-    ].join("/");
+      return new Promise((resolve, reject) => {
+        const folderPath = [
+          "university_resource_hub",
+          folder.university.name,
+          folder.program.name,
+          folder.name
+        ].join("/");
 
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: folderPath,
-        resource_type: "raw",     // RAW for docs / pdfs / pptxs
-        use_filename: true,       // keep original file name
-        unique_filename: false,   // no random suffix
-        overwrite: true,
-        flags: "attachment"       // force attachment header
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
-    uploadStream.end(req.file.buffer);
-  });
-};
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: folderPath,
+            resource_type: resourceType,     // RAW for docs / pdfs / pptxs
+            use_filename: true,       // keep original file name
+            unique_filename: false,   // no random suffix
+            overwrite: true,
+            flags: "attachment"       // force attachment header
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+    };
 
 
     const result = await streamUpload(req);
@@ -96,7 +96,7 @@ exports.uploadFile = async (req, res) => {
     console.error(err);
     res.status(500).json({ msg: "❌ Failed to upload file.", error: err.message });
   }
-};exports.deleteFile = async (req, res) => {
+}; exports.deleteFile = async (req, res) => {
   try {
     const fileId = req.params.id;
     const file = await File.findById(fileId);
